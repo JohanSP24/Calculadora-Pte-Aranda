@@ -17,7 +17,7 @@ const VentaPropiedadCalculadora = () => {
 
   // Parámetros de la venta
   const [porcentajeComision, setPorcentajeComision] = useState(3); // Comisión base (negociable hasta 3.5%)
-  const [porcentajeGananciaOcasional, setPorcentajeGananciaOcasional] = useState(12.5); // Se actualiza al 12.5%
+  const [porcentajeGananciaOcasional, setPorcentajeGananciaOcasional] = useState(12.5); // Actualizado a 12.5%
 
   // Constantes fijas de otros porcentajes
   const retencionFuentePorc = 1;      // 1%
@@ -39,10 +39,10 @@ const VentaPropiedadCalculadora = () => {
   });
 
   useEffect(() => {
-    // Cálculo de la ganancia sujeta a impuesto
+    // Ganancia sujeta a impuesto: diferencia entre el valor de venta y el avalúo catastral
     const gananciaSujetaImpuesto = valorVenta - valorAdquisicion;
     
-    // Calcular cada gasto general basado en el valor de venta
+    // Cálculo de gastos generales basados en el valor de venta
     const comisionAgente = valorVenta * (porcentajeComision / 100);
     const impuestoGanancia = gananciaSujetaImpuesto * (porcentajeGananciaOcasional / 100);
     const retencionFuente = valorVenta * (retencionFuentePorc / 100);
@@ -51,7 +51,7 @@ const VentaPropiedadCalculadora = () => {
     const honorariosNotariales = valorVenta * (honorariosNotarialesPorc / 100);
     const ivaHonorarios = honorariosNotariales * ivaSobreHonorarios;
     
-    // Calcular gastos por propietario (todos los vendedores pagan proporcionalmente)
+    // Calcular gastos individuales para cada propietario (pago proporcional)
     const gastosPorPropietario = propietarios.map(prop => {
       const propPorc = prop.porcentaje / 100;
       const comisionProp = comisionAgente * propPorc;
@@ -74,7 +74,7 @@ const VentaPropiedadCalculadora = () => {
       };
     });
     
-    // Calcular el monto neto por propietario
+    // Calcular el monto neto para cada propietario (valor bruto menos sus gastos)
     const montoNetoPorPropietario = propietarios.map((prop, idx) => {
       const valorBruto = valorVenta * (prop.porcentaje / 100);
       const totalGastos = gastosPorPropietario[idx].totalGastos;
@@ -114,7 +114,7 @@ const VentaPropiedadCalculadora = () => {
     valorAdquisicion
   ]);
 
-  // Formateo para moneda COP
+  // Función para formatear números a moneda COP
   const formatCOP = (valor) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -124,12 +124,14 @@ const VentaPropiedadCalculadora = () => {
     }).format(valor);
   };
 
-  // Suma de porcentajes para verificación (debe ser 100%)
+  // Verificación de suma de porcentajes (debe ser 100%)
   const sumaPorcentajes = propietarios.reduce((suma, prop) => suma + prop.porcentaje, 0);
+
+  // Consolidación de montos netos por grupo se hace en la Tabla 3 (agrupación de "Laura" y "Chava" en esa tabla)
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6 text-center">Mi Calculadora de Venta de Propiedad</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Calculadora de Venta de Propiedad</h1>
       
       {/* Mensaje para la Familia */}
       <section className="mb-8">
@@ -138,14 +140,14 @@ const VentaPropiedadCalculadora = () => {
           Hola familia, espero que todos estén muy bien. Quiero contarles que he estado trabajando en la venta de la casa y les comparto toda la información de manera clara.
         </p>
         <p className="mb-2">
-          Recuerden que la comisión por vender la casa es del <strong>3%</strong> (negociable hasta <strong>3.5%</strong>) sobre el valor total de venta. Cualquiera, ya sea un familiar o un tercero, que consiga un comprador, podrá ganar esta comisión. ¡Si alguno de nosotros logra vender la casa, mejor que la comisión quede en la familia!
+          Recuerden que la comisión por vender la casa es del <strong>3%</strong> (negociable hasta <strong>3.5%</strong>) sobre el valor total de venta. Cualquiera, ya sea un familiar o un tercero, que consiga un comprador podrá ganar esta comisión. ¡Si alguno de nosotros logra vender la casa, mejor que la comisión quede en la familia!
         </p>
       </section>
       
       {/* Datos Principales */}
       <div className="mb-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-4 bg-gray-50 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">Datos de la Venta</h2>
+        <div className="p-6 bg-gray-50 rounded-lg">
+          <h2 className="text-2xl font-semibold mb-4">Datos de la Venta</h2>
           <div className="mb-4">
             <label className="block mb-2 font-medium">Valor de Venta:</label>
             <input
@@ -160,82 +162,73 @@ const VentaPropiedadCalculadora = () => {
             <div className="w-full p-2 border rounded bg-gray-100 text-gray-700">
               {formatCOP(valorAdquisicion)}
             </div>
-            <div className="text-xs text-gray-600 mt-1">
+            <p className="text-xs text-gray-600 mt-1">
               📍 Nota: Este es el valor catastral actualizado del inmueble.
-            </div>
+            </p>
           </div>
           <div className="mt-4">
             <p className="font-medium">Ganancia Sujeta a Impuesto:</p>
-            <p className="text-lg">{formatCOP(calculos.gananciaSujetaImpuesto)}</p>
+            <p className="text-2xl font-bold">{formatCOP(calculos.gananciaSujetaImpuesto)}</p>
           </div>
         </div>
         
-        {/* Ajustes de Porcentajes */}
-        <div className="p-4 bg-gray-50 rounded-lg">
-          <h2 className="text-xl font-semibold mb-4">Porcentajes de Gastos</h2>
-          <div className="grid grid-cols-1 gap-4">
-            <div className="mb-3">
-              <label className="block mb-1 font-medium">
-                Comisión Agente ({porcentajeComision}%):
-              </label>
-              <input
-                type="range"
-                min="3"
-                max="3.5"
-                step="0.1"
-                value={porcentajeComision}
-                onChange={(e) => setPorcentajeComision(parseFloat(e.target.value))}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>3%</span>
-                <span>3.5%</span>
-              </div>
-              <p className="text-xs text-gray-600 mt-1">
-                (La comisión es de un único pago sobre el valor total de venta)
-              </p>
+        {/* Ajustes de Porcentajes con Sliders */}
+        <div className="p-6 bg-gray-50 rounded-lg">
+          <h2 className="text-2xl font-semibold mb-4">Ajustes de Porcentajes</h2>
+          <div className="mb-6">
+            <label className="block mb-1 font-medium">
+              Comisión Agente ({porcentajeComision}%):
+            </label>
+            <input
+              type="range"
+              min="3"
+              max="3.5"
+              step="0.1"
+              value={porcentajeComision}
+              onChange={(e) => setPorcentajeComision(parseFloat(e.target.value))}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>3%</span>
+              <span>3.5%</span>
             </div>
-            <div className="mb-3">
-              <label className="block mb-1 font-medium">
-                Impuesto de Ganancia Ocasional ({porcentajeGananciaOcasional}%):
-              </label>
-              <input
-                type="range"
-                min="10"
-                max="30"
-                step="1"
-                value={porcentajeGananciaOcasional}
-                onChange={(e) => setPorcentajeGananciaOcasional(parseFloat(e.target.value))}
-                className="w-full"
-              />
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>10%</span>
-                <span>30%</span>
-              </div>
-              <p className="text-xs text-gray-600 mt-1">
-                (Se aplica sobre la ganancia neta: diferencia entre valor de venta y avalúo catastral)
-              </p>
+            <p className="text-xs text-gray-600 mt-1">
+              (La comisión es un pago único sobre el valor total de venta.)
+            </p>
+          </div>
+          <div>
+            <label className="block mb-1 font-medium">
+              Impuesto de Ganancia Ocasional ({porcentajeGananciaOcasional}%):
+            </label>
+            <input
+              type="range"
+              min="10"
+              max="30"
+              step="1"
+              value={porcentajeGananciaOcasional}
+              onChange={(e) => setPorcentajeGananciaOcasional(parseFloat(e.target.value))}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>10%</span>
+              <span>30%</span>
             </div>
-            <div className="mb-3">
-              <label className="block mb-1 font-medium">Retención en la Fuente (%):</label>
-              <div className="w-full p-2 border rounded bg-gray-100 text-gray-700">
-                {retencionFuentePorc}
-              </div>
-            </div>
-            <div className="mb-3">
-              <label className="block mb-1 font-medium">Gastos Notariales (%):</label>
-              <div className="w-full p-2 border rounded bg-gray-100 text-gray-700">
-                {gastosNotarialesPorc}
-              </div>
-            </div>
+            <p className="text-xs text-gray-600 mt-1">
+              (Se aplica sobre la ganancia neta: diferencia entre el valor de venta y el avalúo catastral.)
+            </p>
+          </div>
+          <div className="mt-4">
+            <p className="text-xs text-gray-600">
+              Nota: Cualquier ajuste en estos sliders actualizará automáticamente los valores en las tablas.
+            </p>
           </div>
         </div>
       </div>
       
       {/* Distribución de Propiedad */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Distribución de Propiedad</h2>
-        <div className="mb-2 flex justify-between items-center">
+        <h2 className="text-2xl font-semibold mb-4">Distribución de Propiedad</h2>
+        <div className="flex justify-between items-center mb-2">
           <span className="font-medium">Total: {sumaPorcentajes.toFixed(2)}%</span>
           <span className={sumaPorcentajes === 100 ? "text-green-600 font-bold" : "text-red-600 font-bold"}>
             {sumaPorcentajes === 100 ? "✓ Correcto" : "⚠ La suma debe ser 100%"}
@@ -253,12 +246,12 @@ const VentaPropiedadCalculadora = () => {
               {propietarios.map((prop, index) => (
                 <tr key={index} className="border-b">
                   <td className="p-2">
-                    <div className="w-full p-1 border rounded bg-gray-100 text-gray-700">
+                    <div className="p-1 border rounded bg-gray-100 text-gray-700">
                       {prop.nombre}
                     </div>
                   </td>
                   <td className="p-2">
-                    <div className="w-full p-1 border rounded bg-gray-100 text-gray-700">
+                    <div className="p-1 border rounded bg-gray-100 text-gray-700">
                       {prop.porcentaje}
                     </div>
                   </td>
@@ -271,7 +264,7 @@ const VentaPropiedadCalculadora = () => {
       
       {/* Tabla 1: Resumen General de Gastos */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Tabla 1: Resumen General de los Gastos en los que Incurrimos</h2>
+        <h2 className="text-2xl font-semibold mb-4">Tabla 1: Resumen General de los Gastos en los que Incurrimos</h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-sm">
             <thead>
@@ -341,7 +334,7 @@ const VentaPropiedadCalculadora = () => {
       
       {/* Tabla 2: Gastos Individuales */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Tabla 2: Gastos Individuales según Mi Participación</h2>
+        <h2 className="text-2xl font-semibold mb-4">Tabla 2: Gastos Individuales según Mi Participación</h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-sm">
             <thead>
@@ -407,7 +400,7 @@ const VentaPropiedadCalculadora = () => {
       
       {/* Tabla 3: Totalización por Grupo Familiar */}
       <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-4">Tabla 3: Totalización de Montos Netos</h2>
+        <h2 className="text-2xl font-semibold mb-4">Tabla 3: Totalización de Montos Netos</h2>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
@@ -463,32 +456,32 @@ const VentaPropiedadCalculadora = () => {
       </div>
       
       {/* Resumen de la Transacción */}
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <h2 className="text-xl font-semibold mb-4">Resumen de la Transacción</h2>
+      <div className="bg-blue-50 p-6 rounded-lg">
+        <h2 className="text-2xl font-semibold mb-4">Resumen de la Transacción</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <p className="font-medium">Valor de Venta:</p>
-            <p className="text-lg">{formatCOP(valorVenta)}</p>
+            <p className="text-xl">{formatCOP(valorVenta)}</p>
           </div>
           <div>
             <p className="font-medium">Avalúo Catastral:</p>
-            <p className="text-lg">{formatCOP(valorAdquisicion)}</p>
+            <p className="text-xl">{formatCOP(valorAdquisicion)}</p>
           </div>
           <div>
             <p className="font-medium">Ganancia Sujeta a Impuesto:</p>
-            <p className="text-lg">{formatCOP(calculos.gananciaSujetaImpuesto)}</p>
+            <p className="text-xl">{formatCOP(calculos.gananciaSujetaImpuesto)}</p>
           </div>
           <div>
             <p className="font-medium">Total Gastos Vendedores:</p>
-            <p className="text-lg">{formatCOP(calculos.totales.gastosVendedores)}</p>
+            <p className="text-xl">{formatCOP(calculos.totales.gastosVendedores)}</p>
           </div>
           <div>
             <p className="font-medium">Total Impuesto Ganancia Ocasional:</p>
-            <p className="text-lg">{formatCOP(calculos.totales.impuestoGananciaTotal)}</p>
+            <p className="text-xl">{formatCOP(calculos.totales.impuestoGananciaTotal)}</p>
           </div>
           <div>
             <p className="font-medium">Monto Neto Total a Recibir:</p>
-            <p className="text-lg font-bold">{formatCOP(calculos.totales.montoNetoTotal)}</p>
+            <p className="text-xl font-bold">{formatCOP(calculos.totales.montoNetoTotal)}</p>
           </div>
         </div>
         <div className="mt-4 text-sm bg-yellow-50 p-3 rounded">
