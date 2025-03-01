@@ -1,11 +1,160 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
-export default function VentaPropiedadCalculadora() {
-  // Valor de venta y valor catastral
-  const [valorVenta, setValorVenta] = useState(440000000);
-  const valorAdquisicion = 362514000; // Valor catastral
+/**
+ * Hook para detectar si la ventana es "mobile" (menor a 768px).
+ */
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768);
 
-  // Propietarios y sus porcentajes
+  useEffect(() => {
+    function handleResize() {
+      setIsMobile(window.innerWidth < 768);
+    }
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return isMobile;
+}
+
+/**
+ * Función que devuelve un objeto de estilos, cambiando según sea mobile o no.
+ */
+function getStyles(isMobile) {
+  // Paleta de colores de ejemplo
+  const primaryColor = '#2a79c8';
+  const secondaryColor = '#5ea8f2';
+  const highlightColor = '#d4ebfa';
+
+  return {
+    container: {
+      display: 'flex',
+      flexDirection: isMobile ? 'column' : 'row',
+      minHeight: '100vh',
+      backgroundColor: '#f9f9f9',
+      fontFamily: 'Arial, sans-serif'
+    },
+    mainContent: {
+      flex: 1,
+      padding: '2rem',
+      overflowY: 'auto',
+      order: isMobile ? 2 : 1  // En mobile, se muestra después del sidebar
+    },
+    aside: {
+      width: isMobile ? '100%' : '350px',
+      background: `linear-gradient(135deg, ${secondaryColor}, ${primaryColor})`,
+      color: '#fff',
+      padding: '2rem',
+      boxShadow: isMobile ? 'none' : '-2px 0 8px rgba(0,0,0,0.2)',
+      position: isMobile ? 'relative' : 'sticky',
+      top: 0,
+      height: isMobile ? 'auto' : '100vh',
+      order: isMobile ? 1 : 2
+    },
+    title: {
+      fontSize: '2.5rem',
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginBottom: '2rem',
+      color: '#333'
+    },
+    tableContainer: {
+      marginBottom: '3rem',
+      overflowX: 'auto'
+    },
+    tableTitle: {
+      fontSize: '1.8rem',
+      fontWeight: 'bold',
+      marginBottom: '1rem',
+      color: '#444'
+    },
+    table: {
+      width: '100%',
+      borderCollapse: 'collapse',
+      boxShadow: '0 2px 5px rgba(0,0,0,0.15)'
+    },
+    th: {
+      background: `linear-gradient(135deg, #88c7f7, ${primaryColor})`,
+      color: '#fff',
+      padding: '0.75rem',
+      border: '1px solid #ccc',
+      textAlign: 'left'
+    },
+    td: {
+      padding: '0.75rem',
+      border: '1px solid #ccc'
+    },
+    trHighlight: {
+      backgroundColor: highlightColor,
+      fontWeight: 'bold'
+    },
+    notes: {
+      fontSize: '0.9rem',
+      color: '#666',
+      fontStyle: 'italic',
+      marginTop: '0.5rem'
+    },
+    asideTitle: {
+      fontSize: '2rem',
+      fontWeight: 'bold',
+      marginBottom: '1.5rem'
+    },
+    sliderContainer: {
+      marginBottom: '1.5rem'
+    },
+    sliderLabel: {
+      marginBottom: '0.5rem',
+      fontSize: '1rem',
+      fontWeight: 'bold'
+    },
+    slider: {
+      width: '100%',
+      appearance: 'none',
+      height: '8px',
+      borderRadius: '4px',
+      background: '#bcdaf6',
+      outline: 'none',
+      transition: '0.3s'
+    },
+    inputNumber: {
+      width: '100%',
+      padding: '0.5rem',
+      borderRadius: '4px',
+      border: '1px solid #aaa',
+      marginTop: '0.5rem'
+    },
+    highlightBox: {
+      background: '#fff',
+      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+      borderRadius: '4px',
+      padding: '1rem',
+      marginBottom: '1rem'
+    },
+    highlightTitle: {
+      fontWeight: 'bold',
+      marginBottom: '0.2rem'
+    },
+    highlightValue: {
+      fontSize: '1.4rem',
+      color: primaryColor,
+      fontWeight: 'bold'
+    },
+    notesContainer: {
+      marginTop: '1rem',
+      background: '#fffbe5',
+      padding: '1rem',
+      borderRadius: '4px'
+    }
+  };
+}
+
+export default function VentaPropiedadCalculadora() {
+  const isMobile = useIsMobile(); // Detectamos si es mobile
+  const styles = getStyles(isMobile);
+
+  const [valorVenta, setValorVenta] = useState(440000000);
+  const valorAdquisicion = 362514000;
+
   const propietarios = useMemo(() => [
     { nombre: 'Isabel', porcentaje: 25 },
     { nombre: 'Laura', porcentaje: 56.25 },
@@ -14,30 +163,23 @@ export default function VentaPropiedadCalculadora() {
     { nombre: 'Mauricio', porcentaje: 6.25 }
   ], []);
 
-  // Parámetros ajustables
   const [porcentajeComision, setPorcentajeComision] = useState(3);
   const [porcentajeGananciaOcasional, setPorcentajeGananciaOcasional] = useState(12.5);
 
-  // Constantes fijas
-  const retencionFuentePorc = 1;         // 1%
-  const gastosNotarialesPorc = 0.54;     // 0.54% total
-  const porcentajeNotarialesVendedor = gastosNotarialesPorc / 2; // 0.27% p/vendedor
-  const honorariosNotarialesPorc = 0.5;  // 0.5%
-  const ivaSobreHonorarios = 0.19;       // 19%
+  const retencionFuentePorc = 1;
+  const gastosNotarialesPorc = 0.54;
+  const porcentajeNotarialesVendedor = gastosNotarialesPorc / 2;
+  const honorariosNotarialesPorc = 0.5;
+  const ivaSobreHonorarios = 0.19;
 
-  // Estado para almacenar cálculos
   const [calculos, setCalculos] = useState({
     gananciaSujetaImpuesto: 0,
     gastosPorPropietario: [],
     montoNetoPorPropietario: [],
-    totales: {
-      gastosVendedores: 0,
-      montoNetoTotal: 0,
-      impuestoGananciaTotal: 0
-    }
+    totales: { gastosVendedores: 0, montoNetoTotal: 0, impuestoGananciaTotal: 0 }
   });
 
-  // Cálculos en useEffect
+  // Cálculos
   useEffect(() => {
     const gananciaSujetaImpuesto = valorVenta - valorAdquisicion;
     const comisionAgente = valorVenta * (porcentajeComision / 100);
@@ -106,135 +248,16 @@ export default function VentaPropiedadCalculadora() {
     valorAdquisicion
   ]);
 
-  // Formateo a moneda COP
-  const formatCOP = (valor) => {
-    return new Intl.NumberFormat('es-CO', {
-      style: 'currency',
-      currency: 'COP',
-      minimumFractionDigits: 0
-    }).format(valor);
-  };
+  const formatCOP = (valor) => new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0
+  }).format(valor);
 
-  // ---- ESTILOS EN LÍNEA ----
-  const styles = {
-    container: {
-      display: 'flex',
-      minHeight: '100vh',
-      backgroundColor: '#f9f9f9',
-      fontFamily: 'Arial, sans-serif'
-    },
-    mainContent: {
-      flex: 1,
-      padding: '2rem',
-      overflowY: 'auto'
-    },
-    title: {
-      fontSize: '2.5rem',
-      fontWeight: 'bold',
-      textAlign: 'center',
-      marginBottom: '2rem',
-      color: '#333'
-    },
-    tableContainer: {
-      marginBottom: '3rem',
-      overflowX: 'auto'
-    },
-    tableTitle: {
-      fontSize: '1.8rem',
-      fontWeight: 'bold',
-      marginBottom: '1rem',
-      color: '#444'
-    },
-    table: {
-      width: '100%',
-      borderCollapse: 'collapse',
-      boxShadow: '0 2px 5px rgba(0,0,0,0.15)'
-    },
-    th: {
-      background: 'linear-gradient(135deg, #88c7f7, #4796e6)',
-      color: '#fff',
-      padding: '0.75rem',
-      border: '1px solid #ccc',
-      textAlign: 'left'
-    },
-    td: {
-      padding: '0.75rem',
-      border: '1px solid #ccc'
-    },
-    trHighlight: {
-      backgroundColor: '#d4ebfa',
-      fontWeight: 'bold'
-    },
-    notes: {
-      fontSize: '0.9rem',
-      color: '#666',
-      fontStyle: 'italic',
-      marginTop: '0.5rem'
-    },
-    aside: {
-      width: '350px',
-      maxWidth: '100%',
-      background: 'linear-gradient(135deg, #5ea8f2, #2a79c8)',
-      color: '#fff',
-      padding: '2rem',
-      display: 'flex',
-      flexDirection: 'column',
-      boxShadow: '-2px 0 8px rgba(0,0,0,0.2)',
-      position: 'sticky',
-      top: 0,
-      height: '100vh'
-    },
-    asideTitle: {
-      fontSize: '2rem',
-      fontWeight: 'bold',
-      marginBottom: '1.5rem'
-    },
-    sliderContainer: {
-      marginBottom: '1.5rem'
-    },
-    sliderLabel: {
-      marginBottom: '0.5rem',
-      fontSize: '1rem',
-      fontWeight: 'bold'
-    },
-    slider: {
-      width: '100%',
-      appearance: 'none',
-      height: '8px',
-      borderRadius: '4px',
-      background: '#bcdaf6',
-      outline: 'none',
-      transition: '0.3s'
-    },
-    inputNumber: {
-      width: '100%',
-      padding: '0.5rem',
-      borderRadius: '4px',
-      border: '1px solid #aaa',
-      marginTop: '0.5rem'
-    },
-    highlightBox: {
-      background: '#fff',
-      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-      borderRadius: '4px',
-      padding: '1rem',
-      marginBottom: '1rem'
-    },
-    highlightTitle: {
-      fontWeight: 'bold',
-      marginBottom: '0.2rem'
-    },
-    highlightValue: {
-      fontSize: '1.4rem',
-      color: '#0055cc',
-      fontWeight: 'bold'
-    }
-  };
-
-  // ---- RENDER ----
+  // Render
   return (
     <div style={styles.container}>
-      {/* MAIN CONTENT */}
+      {/* CONTENIDO PRINCIPAL */}
       <div style={styles.mainContent}>
         <h1 style={styles.title}>Resumen de Venta de Propiedad</h1>
 
@@ -264,32 +287,28 @@ export default function VentaPropiedadCalculadora() {
                 <td style={styles.td}>Gastos Notariales</td>
                 <td style={styles.td}>0.27%</td>
                 <td style={styles.td}>
-                  {formatCOP(valorVenta * (porcentajeNotarialesVendedor / 100))}
+                  {formatCOP(valorVenta * (gastosNotarialesPorc / 2 / 100))}
                 </td>
               </tr>
               <tr>
                 <td style={styles.td}>Honorarios Notariales</td>
                 <td style={styles.td}>0.5%</td>
                 <td style={styles.td}>
-                  {formatCOP(valorVenta * (honorariosNotarialesPorc / 100))}
+                  {formatCOP(valorVenta * 0.5 / 100)}
                 </td>
               </tr>
               <tr>
                 <td style={styles.td}>IVA sobre Honorarios</td>
                 <td style={styles.td}>19% (Honorarios)</td>
                 <td style={styles.td}>
-                  {formatCOP(
-                    valorVenta * (honorariosNotarialesPorc / 100) * 0.19
-                  )}
+                  {formatCOP(valorVenta * 0.5 / 100 * 0.19)}
                 </td>
               </tr>
               <tr>
                 <td style={styles.td}>Impuesto de Ganancia Ocasional</td>
                 <td style={styles.td}>{porcentajeGananciaOcasional}% (ganancia neta)</td>
                 <td style={styles.td}>
-                  {formatCOP(
-                    (valorVenta - valorAdquisicion) * (porcentajeGananciaOcasional / 100)
-                  )}
+                  {formatCOP((valorVenta - valorAdquisicion) * (porcentajeGananciaOcasional / 100))}
                 </td>
               </tr>
               <tr style={styles.trHighlight}>
@@ -299,8 +318,8 @@ export default function VentaPropiedadCalculadora() {
                   {formatCOP(
                     valorVenta * (porcentajeComision / 100) +
                     valorVenta * 0.01 +
-                    valorVenta * (porcentajeNotarialesVendedor / 100) +
-                    valorVenta * (honorariosNotarialesPorc / 100) * (1 + 0.19) +
+                    valorVenta * (gastosNotarialesPorc / 2 / 100) +
+                    valorVenta * 0.5 / 100 * (1 + 0.19) +
                     (valorVenta - valorAdquisicion) * (porcentajeGananciaOcasional / 100)
                   )}
                 </td>
@@ -308,8 +327,7 @@ export default function VentaPropiedadCalculadora() {
             </tbody>
           </table>
           <p style={styles.notes}>
-            * El impuesto de Ganancia Ocasional se calcula sobre la ganancia neta, es decir, la diferencia
-            entre el valor de venta y el avalúo catastral ({formatCOP(valorAdquisicion)}).
+            * El impuesto de Ganancia Ocasional se calcula sobre la ganancia neta: (valor de venta - avalúo catastral).
           </p>
         </div>
 
@@ -369,7 +387,7 @@ export default function VentaPropiedadCalculadora() {
             </tbody>
           </table>
           <p style={styles.notes}>
-            * El impuesto de Ganancia Ocasional se paga en la declaración de renta del año siguiente.
+            * El impuesto de Ganancia Ocasional se paga en la declaración de renta del próximo año.
           </p>
         </div>
 
@@ -427,9 +445,16 @@ export default function VentaPropiedadCalculadora() {
           </p>
         </div>
 
-        {/* RESUMEN DE LA TRANSACCION */}
-        <div style={{ backgroundColor: '#f0f8ff', padding: '1rem', borderRadius: '5px', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }}>
-          <h2 style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '1rem' }}>Resumen de la Transacción</h2>
+        {/* Resumen de la Transacción */}
+        <div style={{
+          backgroundColor: '#f0f8ff',
+          padding: '1rem',
+          borderRadius: '5px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.2)'
+        }}>
+          <h2 style={{ fontSize: '1.8rem', fontWeight: 'bold', marginBottom: '1rem' }}>
+            Resumen de la Transacción
+          </h2>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={styles.highlightBox}>
               <p style={styles.highlightTitle}>Valor de Venta:</p>
@@ -458,31 +483,40 @@ export default function VentaPropiedadCalculadora() {
               </p>
             </div>
           </div>
-          <div style={{ marginTop: '1rem', background: '#fffbe5', padding: '1rem', borderRadius: '4px' }}>
+          <div style={styles.notesContainer}>
             <strong>Notas importantes:</strong>
             <ul style={{ marginLeft: '1.5rem', marginTop: '0.5rem' }}>
               <li>La comisión es un pago único del 3% (negociable hasta 3.5%) sobre el valor total de venta.</li>
-              <li>El impuesto de Ganancia Ocasional (calculado al {porcentajeGananciaOcasional}%)
+              <li>
+                El impuesto de Ganancia Ocasional ({porcentajeGananciaOcasional}%)
                 se declara en la renta del próximo año.
               </li>
-              <li>Isabel podría estar exenta o pagar menos impuesto si no declara renta y ha vivido siempre en la casa.</li>
+              <li>
+                Isabel podría estar exenta o pagar menos si no declara renta y ha vivido allí siempre.
+              </li>
             </ul>
           </div>
         </div>
       </div>
 
-      {/* SIDEBAR FIJO */}
+      {/* SIDEBAR */}
       <aside style={styles.aside}>
         <h2 style={styles.asideTitle}>Ajustes y Datos</h2>
+
         <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Datos de la Venta</h3>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>Valor de Venta:</label>
+          <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>
+            Datos de la Venta
+          </h3>
+          <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
+            Valor de Venta:
+          </label>
           <input
             type="number"
             style={styles.inputNumber}
             value={valorVenta}
             onChange={(e) => setValorVenta(parseFloat(e.target.value) || 0)}
           />
+
           <div style={{ marginTop: '1rem' }}>
             <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>
               Avalúo Catastral:
@@ -496,6 +530,7 @@ export default function VentaPropiedadCalculadora() {
               {formatCOP(valorAdquisicion)}
             </div>
           </div>
+
           <div style={{ marginTop: '1rem' }}>
             <p style={{ fontWeight: 'bold' }}>Ganancia Sujeta a Impuesto:</p>
             <p style={{ fontSize: '1.2rem', color: '#fff' }}>
@@ -505,7 +540,9 @@ export default function VentaPropiedadCalculadora() {
         </div>
 
         <div>
-          <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Ajustes de Porcentajes</h3>
+          <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>
+            Ajustes de Porcentajes
+          </h3>
           <div style={styles.sliderContainer}>
             <label style={styles.sliderLabel}>
               Comisión Agente ({porcentajeComision}%):
@@ -524,6 +561,7 @@ export default function VentaPropiedadCalculadora() {
               <span>3.5%</span>
             </div>
           </div>
+
           <div style={styles.sliderContainer}>
             <label style={styles.sliderLabel}>
               Impuesto de Ganancia Ocasional ({porcentajeGananciaOcasional}%):
@@ -542,6 +580,7 @@ export default function VentaPropiedadCalculadora() {
               <span>30%</span>
             </div>
           </div>
+
           <p style={{ fontSize: '0.8rem', fontStyle: 'italic', marginTop: '1rem' }}>
             * Los ajustes se actualizan automáticamente en las tablas.
           </p>
