@@ -17,7 +17,7 @@ const VentaPropiedadCalculadora = () => {
 
   // Parámetros de la venta
   const [porcentajeComision, setPorcentajeComision] = useState(3); // Comisión base (negociable hasta 3.5%)
-  const [porcentajeGananciaOcasional, setPorcentajeGananciaOcasional] = useState(12.5); // Se ha actualizado al 12.5%
+  const [porcentajeGananciaOcasional, setPorcentajeGananciaOcasional] = useState(12.5); // Se actualiza al 12.5%
 
   // Constantes fijas de otros porcentajes
   const retencionFuentePorc = 1;      // 1%
@@ -126,12 +126,6 @@ const VentaPropiedadCalculadora = () => {
 
   // Suma de porcentajes para verificación (debe ser 100%)
   const sumaPorcentajes = propietarios.reduce((suma, prop) => suma + prop.porcentaje, 0);
-
-  // Consolidación de montos netos por grupo familiar
-  const grupoLaura = calculos.montoNetoPorPropietario.find(p => p.nombre === 'Laura');
-  const grupoChava = calculos.montoNetoPorPropietario
-    .filter(p => p.nombre !== 'Laura')
-    .reduce((total, p) => total + p.montoNeto, 0);
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg max-w-5xl mx-auto">
@@ -377,13 +371,27 @@ const VentaPropiedadCalculadora = () => {
               ))}
               <tr className="bg-gray-100 font-bold">
                 <td className="p-2">Total</td>
-                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.comisionAgente, 0))}</td>
-                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.impuestoGanancia, 0))}</td>
-                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.retencionFuente, 0))}</td>
-                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.gastosNotariales, 0))}</td>
-                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.honorariosNotariales, 0))}</td>
-                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.ivaHonorarios, 0))}</td>
-                <td className="p-2 text-right">{formatCOP(calculos.totales.gastosVendedores)}</td>
+                <td className="p-2 text-right">
+                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.comisionAgente, 0))}
+                </td>
+                <td className="p-2 text-right">
+                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.impuestoGanancia, 0))}
+                </td>
+                <td className="p-2 text-right">
+                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.retencionFuente, 0))}
+                </td>
+                <td className="p-2 text-right">
+                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.gastosNotariales, 0))}
+                </td>
+                <td className="p-2 text-right">
+                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.honorariosNotariales, 0))}
+                </td>
+                <td className="p-2 text-right">
+                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.ivaHonorarios, 0))}
+                </td>
+                <td className="p-2 text-right">
+                  {formatCOP(calculos.totales.gastosVendedores)}
+                </td>
               </tr>
             </tbody>
             <tfoot>
