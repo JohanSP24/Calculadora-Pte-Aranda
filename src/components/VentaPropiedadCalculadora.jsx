@@ -457,7 +457,7 @@ export default function VentaPropiedadCalculadora() {
                 El impuesto de Ganancia Ocasional (calculado al <strong>{porcentajeGananciaOcasional}%</strong> sobre la ganancia neta) se declara y paga en la declaración de renta del próximo año. La ganancia neta es la diferencia entre el valor de venta y el avalúo catastral ({formatCOP(valorAdquisicion)}).
               </li>
               <li>
-                Algunos propietarios, como Isabel, podrían estar exentos o pagar menos este impuesto (por ejemplo, si no declara renta y ha vivido allí siempre).
+                Algunos propietarios, como Chavela y Pato, podrían estar exentos o pagar menos este impuesto (por ejemplo, si no declara renta y ha vivido allí siempre).
               </li>
             </ul>
           </div>
