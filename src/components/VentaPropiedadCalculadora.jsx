@@ -1,8 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
-/**
- * Hook para detectar si la pantalla es mobile (ancho < 768px)
- */
 function useIsMobile() {
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   useEffect(() => {
@@ -13,14 +10,10 @@ function useIsMobile() {
   return isMobile;
 }
 
-/**
- * Función que retorna estilos en línea según si es mobile o no.
- */
 function getStyles(isMobile) {
   const primaryColor = '#2a79c8';
   const secondaryColor = '#5ea8f2';
   const highlightColor = '#d4ebfa';
-
   return {
     container: {
       display: 'flex',
@@ -147,7 +140,6 @@ export default function VentaPropiedadCalculadora() {
   const isMobile = useIsMobile();
   const styles = getStyles(isMobile);
 
-  // Valores y parámetros de venta
   const [valorVenta, setValorVenta] = useState(440000000);
   const valorAdquisicion = 362514000;
 
@@ -164,12 +156,10 @@ export default function VentaPropiedadCalculadora() {
 
   const retencionFuentePorc = 1;
   const gastosNotarialesPorc = 0.54;
-  // Usamos la variable para evitar error ESLint:
   const porcentajeNotarialesVendedor = gastosNotarialesPorc / 2; // 0.27%
   const honorariosNotarialesPorc = 0.5;
   const ivaSobreHonorarios = 0.19;
 
-  // Estado para cálculos
   const [calculos, setCalculos] = useState({
     gananciaSujetaImpuesto: 0,
     gastosPorPropietario: [],
@@ -182,7 +172,6 @@ export default function VentaPropiedadCalculadora() {
     const comisionAgente = valorVenta * (porcentajeComision / 100);
     const impuestoGanancia = gananciaSujetaImpuesto * (porcentajeGananciaOcasional / 100);
     const retencionFuente = valorVenta * (retencionFuentePorc / 100);
-    // Aquí usamos la variable porcentajeNotarialesVendedor
     const gastosNotarialesVendedorValue = valorVenta * (porcentajeNotarialesVendedor / 100);
     const honorariosNotariales = valorVenta * (honorariosNotarialesPorc / 100);
     const ivaHonorarios = honorariosNotariales * ivaSobreHonorarios;
@@ -256,7 +245,7 @@ export default function VentaPropiedadCalculadora() {
     <div style={styles.container}>
       {/* MAIN CONTENT */}
       <div style={styles.mainContent}>
-        <h1 style={styles.title}>Resumen de Venta de Propiedad</h1>
+        <h1 style={styles.title}>Resumen de Venta Pte Aranda</h1>
 
         {/* Tabla 1: Resumen General de Gastos */}
         <div style={styles.tableContainer}>
@@ -272,13 +261,13 @@ export default function VentaPropiedadCalculadora() {
             <tbody>
               <tr>
                 <td style={styles.td}>Comisión del Agente Inmobiliario</td>
-                <td style={styles.td}>3%</td>
+                <td style={styles.td}>{porcentajeComision}%</td>
                 <td style={styles.td}>{formatCOP(valorVenta * (porcentajeComision / 100))}</td>
               </tr>
               <tr>
                 <td style={styles.td}>Retención en la Fuente</td>
                 <td style={styles.td}>1%</td>
-                <td style={styles.td}>{formatCOP(valorVenta * (retencionFuentePorc / 100))}</td>
+                <td style={styles.td}>{formatCOP(valorVenta * 0.01)}</td>
               </tr>
               <tr>
                 <td style={styles.td}>Gastos Notariales</td>
@@ -292,12 +281,14 @@ export default function VentaPropiedadCalculadora() {
               </tr>
               <tr>
                 <td style={styles.td}>IVA sobre Honorarios</td>
-                <td style={styles.td}>19% (sobre honorarios)</td>
+                <td style={styles.td}>19% sobre honorarios</td>
                 <td style={styles.td}>{formatCOP(valorVenta * (honorariosNotarialesPorc / 100) * ivaSobreHonorarios)}</td>
               </tr>
               <tr>
                 <td style={styles.td}>Impuesto de Ganancia Ocasional</td>
-                <td style={styles.td}>12.5% (sobre ganancia neta)</td>
+                <td style={styles.td}>
+                  {porcentajeGananciaOcasional}% sobre ganancia neta
+                </td>
                 <td style={styles.td}>
                   {formatCOP((valorVenta - valorAdquisicion) * (porcentajeGananciaOcasional / 100))}
                 </td>
@@ -308,7 +299,7 @@ export default function VentaPropiedadCalculadora() {
                 <td style={styles.td}>
                   {formatCOP(
                     valorVenta * (porcentajeComision / 100) +
-                    valorVenta * (retencionFuentePorc / 100) +
+                    valorVenta * 0.01 +
                     valorVenta * (porcentajeNotarialesVendedor / 100) +
                     valorVenta * (honorariosNotarialesPorc / 100) * (1 + ivaSobreHonorarios) +
                     (valorVenta - valorAdquisicion) * (porcentajeGananciaOcasional / 100)
@@ -319,7 +310,7 @@ export default function VentaPropiedadCalculadora() {
             <tfoot>
               <tr>
                 <td colSpan="3" style={{ padding: '0.5rem', fontSize: '0.9rem', color: '#666', fontStyle: 'italic', borderTop: '1px solid #ccc' }}>
-                  * El impuesto de Ganancia Ocasional se calcula sobre la ganancia neta, es decir, la diferencia entre el valor de venta y el avalúo catastral (actualmente {formatCOP(valorAdquisicion)}).
+                  * El impuesto de Ganancia Ocasional se calcula sobre la ganancia neta, es decir, (Valor de Venta - Avalúo Catastral: {formatCOP(valorAdquisicion)}).
                 </td>
               </tr>
             </tfoot>
@@ -329,7 +320,7 @@ export default function VentaPropiedadCalculadora() {
 
         {/* Tabla 2: Gastos Individuales */}
         <div style={styles.tableContainer}>
-          <h2 style={styles.tableTitle}>Tabla 2: Gastos Individuales según Mi Participación</h2>
+          <h2 style={styles.tableTitle}>Tabla 2: Gastos Individuales según Participación</h2>
           <table style={styles.table}>
             <thead>
               <tr>
@@ -358,12 +349,12 @@ export default function VentaPropiedadCalculadora() {
               ))}
               <tr style={styles.trHighlight}>
                 <td style={styles.td}>Total</td>
-                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.comisionAgente, 0))}</td>
-                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.impuestoGanancia, 0))}</td>
-                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.retencionFuente, 0))}</td>
-                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.gastosNotariales, 0))}</td>
-                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.honorariosNotariales, 0))}</td>
-                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.ivaHonorarios, 0))}</td>
+                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((acc, p) => acc + p.comisionAgente, 0))}</td>
+                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((acc, p) => acc + p.impuestoGanancia, 0))}</td>
+                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((acc, p) => acc + p.retencionFuente, 0))}</td>
+                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((acc, p) => acc + p.gastosNotariales, 0))}</td>
+                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((acc, p) => acc + p.honorariosNotariales, 0))}</td>
+                <td style={styles.td}>{formatCOP(calculos.gastosPorPropietario.reduce((acc, p) => acc + p.ivaHonorarios, 0))}</td>
                 <td style={styles.td}>{formatCOP(calculos.totales.gastosVendedores)}</td>
               </tr>
             </tbody>
@@ -460,10 +451,10 @@ export default function VentaPropiedadCalculadora() {
             <strong>Notas importantes:</strong>
             <ul style={{ marginLeft: '1.5rem', marginTop: '0.5rem', color: '#666' }}>
               <li>
-                La comisión es un pago único del <strong>3%</strong> (negociable hasta <strong>3.5%</strong>) sobre el valor total de venta, y puede ser obtenida por cualquier familiar o tercero que consiga el comprador.
+                La comisión es un pago único del <strong>{porcentajeComision}%</strong> (negociable hasta 3.5%) sobre el valor total de venta, y puede ser obtenida por cualquier familiar o tercero que consiga el comprador.
               </li>
               <li>
-                El impuesto de Ganancia Ocasional (calculado al {porcentajeGananciaOcasional}% sobre la ganancia neta) se declara y paga en la declaración de renta del próximo año. La ganancia neta es la diferencia entre el valor de venta y el avalúo catastral ({formatCOP(valorAdquisicion)}).
+                El impuesto de Ganancia Ocasional (calculado al <strong>{porcentajeGananciaOcasional}%</strong> sobre la ganancia neta) se declara y paga en la declaración de renta del próximo año. La ganancia neta es la diferencia entre el valor de venta y el avalúo catastral ({formatCOP(valorAdquisicion)}).
               </li>
               <li>
                 Algunos propietarios, como Isabel, podrían estar exentos o pagar menos este impuesto (por ejemplo, si no declara renta y ha vivido allí siempre).
@@ -497,7 +488,6 @@ export default function VentaPropiedadCalculadora() {
             <p style={{ fontSize: '1.2rem', color: '#fff' }}>{formatCOP(calculos.gananciaSujetaImpuesto)}</p>
           </div>
         </div>
-
         <div>
           <h3 style={{ fontSize: '1.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Ajustes de Porcentajes</h3>
           <div style={styles.sliderContainer}>
