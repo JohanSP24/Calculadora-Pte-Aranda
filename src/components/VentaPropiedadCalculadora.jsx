@@ -1,16 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 
 const VentaPropiedadCalculadora = () => {
   const [valorVenta, setValorVenta] = useState(440000000);
   const valorAdquisicion = 362514000; // Avalúo Catastral
-  const propietarios = [
+  
+  // Memoizamos el array de propietarios para que no se re-cree en cada render
+  const propietarios = useMemo(() => [
     { nombre: 'Chava', porcentaje: 25 },
     { nombre: 'Laura', porcentaje: 56.25 },
     { nombre: 'Patricia', porcentaje: 6.25 },
     { nombre: 'Ruth', porcentaje: 6.25 },
     { nombre: 'Mauricio', porcentaje: 6.25 }
-  ];
-
+  ], []);
+  
   const [porcentajeComision, setPorcentajeComision] = useState(3);
   const [porcentajeGananciaOcasional, setPorcentajeGananciaOcasional] = useState(10);
 
