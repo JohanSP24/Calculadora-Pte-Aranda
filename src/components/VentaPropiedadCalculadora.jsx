@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 const VentaPropiedadCalculadora = () => {
-  // Valor de venta y valor catastral (avalúo) actualizado
+  // Valor de venta y valor catastral actualizado (Avalúo Catastral 2024)
   const [valorVenta, setValorVenta] = useState(440000000);
-  const valorAdquisicion = 362514000; // Avalúo Catastral actualizado (2024)
+  const valorAdquisicion = 362514000; // Valor catastral actualizado
 
-  // Definición de propietarios con sus porcentajes
-  // En este caso: "Laura" es un grupo separado y "Chava" agrupa a Isabel, Patricia, Ruth y Mauricio.
-  // Inicialmente, usamos los porcentajes: Isabel 25%, Laura 56.25%, Patricia 6.25%, Ruth 6.25%, Mauricio 6.25%.
+  // Definición de propietarios con sus porcentajes:
+  // Se tiene: Isabel 25%, Laura 56.25%, Patricia 6.25%, Ruth 6.25%, Mauricio 6.25%
   const propietarios = useMemo(() => [
     { nombre: 'Isabel', porcentaje: 25 },
     { nombre: 'Laura', porcentaje: 56.25 },
@@ -17,16 +16,15 @@ const VentaPropiedadCalculadora = () => {
   ], []);
 
   // Parámetros de la venta
-  const [porcentajeComision, setPorcentajeComision] = useState(3); // Comisión base, negociable hasta 3.5%
-  // Actualizamos el porcentaje de impuesto de ganancia ocasional a 12.5%
-  const [porcentajeGananciaOcasional, setPorcentajeGananciaOcasional] = useState(12.5);
+  const [porcentajeComision, setPorcentajeComision] = useState(3); // Comisión base (negociable hasta 3.5%)
+  const [porcentajeGananciaOcasional, setPorcentajeGananciaOcasional] = useState(12.5); // Se ha actualizado al 12.5%
 
   // Constantes fijas de otros porcentajes
   const retencionFuentePorc = 1;      // 1%
-  const gastosNotarialesPorc = 0.54;   // 0.54% total, se asume 50% para vendedor
+  const gastosNotarialesPorc = 0.54;   // 0.54% total (se asume 50% para vendedor)
   const porcentajeNotarialesVendedor = gastosNotarialesPorc / 2; // 0.27%
   const honorariosNotarialesPorc = 0.5; // 0.5%
-  const ivaSobreHonorarios = 0.19;     // 19% IVA sobre honorarios
+  const ivaSobreHonorarios = 0.19;     // 19%
 
   // Estado para almacenar los cálculos
   const [calculos, setCalculos] = useState({
@@ -41,19 +39,19 @@ const VentaPropiedadCalculadora = () => {
   });
 
   useEffect(() => {
-    // Cálculo de ganancia sujeta al impuesto: diferencia entre venta y valor catastral
+    // Cálculo de la ganancia sujeta a impuesto
     const gananciaSujetaImpuesto = valorVenta - valorAdquisicion;
-
-    // Cálculo de cada gasto general (para vendedores) basado en el valor de venta:
+    
+    // Calcular cada gasto general basado en el valor de venta
     const comisionAgente = valorVenta * (porcentajeComision / 100);
     const impuestoGanancia = gananciaSujetaImpuesto * (porcentajeGananciaOcasional / 100);
     const retencionFuente = valorVenta * (retencionFuentePorc / 100);
     const gastosNotariales = valorVenta * (gastosNotarialesPorc / 100);
-    const gastosNotarialesVendedor = gastosNotariales / 2; // se asume 50% de notariales para vendedor
+    const gastosNotarialesVendedor = gastosNotariales / 2;
     const honorariosNotariales = valorVenta * (honorariosNotarialesPorc / 100);
     const ivaHonorarios = honorariosNotariales * ivaSobreHonorarios;
-
-    // Calcular gastos individuales para cada propietario (todos los vendedores pagan proporcionalmente)
+    
+    // Calcular gastos por propietario (todos los vendedores pagan proporcionalmente)
     const gastosPorPropietario = propietarios.map(prop => {
       const propPorc = prop.porcentaje / 100;
       const comisionProp = comisionAgente * propPorc;
@@ -62,7 +60,6 @@ const VentaPropiedadCalculadora = () => {
       const notarialesProp = gastosNotarialesVendedor * propPorc;
       const honorariosProp = honorariosNotariales * propPorc;
       const ivaProp = ivaHonorarios * propPorc;
-      // Total de gastos para el vendedor incluye todos estos rubros
       const totalGastosProp = comisionProp + retencionProp + notarialesProp + honorariosProp + ivaProp + impuestoProp;
       return {
         nombre: prop.nombre,
@@ -76,7 +73,7 @@ const VentaPropiedadCalculadora = () => {
         totalGastos: totalGastosProp
       };
     });
-
+    
     // Calcular el monto neto por propietario
     const montoNetoPorPropietario = propietarios.map((prop, idx) => {
       const valorBruto = valorVenta * (prop.porcentaje / 100);
@@ -89,12 +86,12 @@ const VentaPropiedadCalculadora = () => {
         montoNeto: valorBruto - totalGastos
       };
     });
-
+    
     // Totales generales
     const totalGastosVendedores = gastosPorPropietario.reduce((acc, prop) => acc + prop.totalGastos, 0);
     const totalNetoVendedores = montoNetoPorPropietario.reduce((acc, prop) => acc + prop.montoNeto, 0);
     const totalImpuestoGanancia = gastosPorPropietario.reduce((acc, prop) => acc + prop.impuestoGanancia, 0);
-
+    
     setCalculos({
       gananciaSujetaImpuesto,
       gastosPorPropietario,
@@ -130,24 +127,24 @@ const VentaPropiedadCalculadora = () => {
   // Suma de porcentajes para verificación (debe ser 100%)
   const sumaPorcentajes = propietarios.reduce((suma, prop) => suma + prop.porcentaje, 0);
 
-  // Consolidación de montos netos por grupo:
-  // "Laura" es un grupo; "Chava" agrupa a Isabel, Patricia, Ruth y Mauricio.
-  const grupoLaura = calculos.montoNetoPorPropietario.find(p => p.nombre === 'Laura') || { montoNeto: 0 };
-  const grupoChava = calculos.montoNetoPorPropietario.filter(p => p.nombre !== 'Laura')
+  // Consolidación de montos netos por grupo familiar
+  const grupoLaura = calculos.montoNetoPorPropietario.find(p => p.nombre === 'Laura');
+  const grupoChava = calculos.montoNetoPorPropietario
+    .filter(p => p.nombre !== 'Laura')
     .reduce((total, p) => total + p.montoNeto, 0);
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-6 text-center">Mi Calculadora de Venta de Propiedad</h1>
       
-      {/* Mensaje para la familia */}
+      {/* Mensaje para la Familia */}
       <section className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Mensaje para la Familia</h2>
         <p className="mb-2">
           Hola familia, espero que todos estén muy bien. Quiero contarles que he estado trabajando en la venta de la casa y les comparto toda la información de manera clara.
         </p>
         <p className="mb-2">
-          Recuerden que la comisión por vender la casa es del <strong>3%</strong> (negociable hasta <strong>3.5%</strong>). Esto se paga sobre el valor total de venta, y cualquiera, ya sea un familiar o un tercero, que consiga un comprador podrá ganar esta comisión. ¡Así que si alguno de nosotros logra vender la casa, mejor que la comisión quede entre la familia!
+          Recuerden que la comisión por vender la casa es del <strong>3%</strong> (negociable hasta <strong>3.5%</strong>) sobre el valor total de venta. Cualquiera, ya sea un familiar o un tercero, que consiga un comprador, podrá ganar esta comisión. ¡Si alguno de nosotros logra vender la casa, mejor que la comisión quede en la familia!
         </p>
       </section>
       
@@ -169,7 +166,9 @@ const VentaPropiedadCalculadora = () => {
             <div className="w-full p-2 border rounded bg-gray-100 text-gray-700">
               {formatCOP(valorAdquisicion)}
             </div>
-            <div className="text-xs text-gray-600 mt-1">📍 Nota: Este es el valor catastral actualizado del inmueble.</div>
+            <div className="text-xs text-gray-600 mt-1">
+              📍 Nota: Este es el valor catastral actualizado del inmueble.
+            </div>
           </div>
           <div className="mt-4">
             <p className="font-medium">Ganancia Sujeta a Impuesto:</p>
@@ -220,7 +219,7 @@ const VentaPropiedadCalculadora = () => {
                 <span>30%</span>
               </div>
               <p className="text-xs text-gray-600 mt-1">
-                (Este porcentaje se aplica sobre la ganancia neta, que es la diferencia entre el valor de venta y el avalúo catastral)
+                (Se aplica sobre la ganancia neta: diferencia entre valor de venta y avalúo catastral)
               </p>
             </div>
             <div className="mb-3">
@@ -346,7 +345,7 @@ const VentaPropiedadCalculadora = () => {
         </div>
       </div>
       
-      {/* Tabla 2: Gastos por Propietario */}
+      {/* Tabla 2: Gastos Individuales */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Tabla 2: Gastos Individuales según Mi Participación</h2>
         <div className="overflow-x-auto">
@@ -378,27 +377,13 @@ const VentaPropiedadCalculadora = () => {
               ))}
               <tr className="bg-gray-100 font-bold">
                 <td className="p-2">Total</td>
-                <td className="p-2 text-right">
-                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.comisionAgente, 0))}
-                </td>
-                <td className="p-2 text-right">
-                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.impuestoGanancia, 0))}
-                </td>
-                <td className="p-2 text-right">
-                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.retencionFuente, 0))}
-                </td>
-                <td className="p-2 text-right">
-                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.gastosNotariales, 0))}
-                </td>
-                <td className="p-2 text-right">
-                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.honorariosNotariales, 0))}
-                </td>
-                <td className="p-2 text-right">
-                  {formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.ivaHonorarios, 0))}
-                </td>
-                <td className="p-2 text-right">
-                  {formatCOP(calculos.totales.gastosVendedores)}
-                </td>
+                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.comisionAgente, 0))}</td>
+                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.impuestoGanancia, 0))}</td>
+                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.retencionFuente, 0))}</td>
+                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.gastosNotariales, 0))}</td>
+                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.honorariosNotariales, 0))}</td>
+                <td className="p-2 text-right">{formatCOP(calculos.gastosPorPropietario.reduce((sum, p) => sum + p.ivaHonorarios, 0))}</td>
+                <td className="p-2 text-right">{formatCOP(calculos.totales.gastosVendedores)}</td>
               </tr>
             </tbody>
             <tfoot>
@@ -469,7 +454,7 @@ const VentaPropiedadCalculadora = () => {
         </div>
       </div>
       
-      {/* Resumen Final de la Transacción */}
+      {/* Resumen de la Transacción */}
       <div className="bg-blue-50 p-4 rounded-lg">
         <h2 className="text-xl font-semibold mb-4">Resumen de la Transacción</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
