@@ -103,9 +103,10 @@ const VentaPropiedadCalculadora = () => {
     valorVenta,
     porcentajeComision,
     porcentajeGananciaOcasional,
+    propietarios,
     porcentajes.comisionAgente,
     porcentajes.impuestoGananciaOcasional,
-    porcentajes.retencionFuente, // corresponde a "porcentajes.ret"
+    porcentajes.retencionFuente,
     porcentajes.gastosNotariales
   ]);
 
@@ -374,5 +375,3 @@ const VentaPropiedadCalculadora = () => {
 };
 
 export default VentaPropiedadCalculadora;
-
-
