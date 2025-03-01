@@ -11,7 +11,6 @@ const VentaPropiedadCalculadora = () => {
     { nombre: 'Mauricio', porcentaje: 6.25 }
   ];
 
-  // Estados para los porcentajes de comisión y ganancia ocasional
   const [porcentajeComision, setPorcentajeComision] = useState(3);
   const [porcentajeGananciaOcasional, setPorcentajeGananciaOcasional] = useState(10);
 
@@ -100,7 +99,13 @@ const VentaPropiedadCalculadora = () => {
         impuestoGananciaTotal: totalImpuestoGanancia
       }
     });
-  }, [valorVenta, porcentajeComision, porcentajeGananciaOcasional]);
+  }, [
+    valorVenta,
+    porcentajeComision,
+    porcentajeGananciaOcasional,
+    porcentajes.comisionAgente,
+    porcentajes.gastosNotariales
+  ]);
 
   const formatCOP = (valor) => {
     return new Intl.NumberFormat('es-CO', {
@@ -367,3 +372,4 @@ const VentaPropiedadCalculadora = () => {
 };
 
 export default VentaPropiedadCalculadora;
+
