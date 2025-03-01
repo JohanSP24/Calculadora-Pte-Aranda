@@ -39,7 +39,7 @@ const VentaPropiedadCalculadora = () => {
   });
 
   useEffect(() => {
-    // Ganancia sujeta a impuesto: diferencia entre valor de venta y avalúo catastral
+    // Ganancia sujeta a impuesto: diferencia entre el valor de venta y el avalúo catastral
     const gananciaSujetaImpuesto = valorVenta - valorAdquisicion;
     
     // Cálculo de gastos generales basados en el valor de venta
@@ -51,7 +51,7 @@ const VentaPropiedadCalculadora = () => {
     const honorariosNotariales = valorVenta * (honorariosNotarialesPorc / 100);
     const ivaHonorarios = honorariosNotariales * ivaSobreHonorarios;
     
-    // Calcular gastos individuales para cada propietario
+    // Calcular gastos individuales para cada propietario (pago proporcional)
     const gastosPorPropietario = propietarios.map(prop => {
       const propPorc = prop.porcentaje / 100;
       const comisionProp = comisionAgente * propPorc;
@@ -74,7 +74,7 @@ const VentaPropiedadCalculadora = () => {
       };
     });
     
-    // Calcular monto neto para cada propietario (valor bruto menos gastos)
+    // Calcular el monto neto para cada propietario (valor bruto menos gastos)
     const montoNetoPorPropietario = propietarios.map((prop, idx) => {
       const valorBruto = valorVenta * (prop.porcentaje / 100);
       const totalGastos = gastosPorPropietario[idx].totalGastos;
@@ -124,12 +124,6 @@ const VentaPropiedadCalculadora = () => {
     }).format(valor);
   };
 
-  const sumaPorcentajes = propietarios.reduce((suma, prop) => suma + prop.porcentaje, 0);
-
-  // Consolidar montos netos para Tabla 3:
-  const totalNetoLaura = calculos.montoNetoPorPropietario.find(p => p.nombre === 'Laura')?.montoNeto || 0;
-  const totalNetoChava = calculos.montoNetoPorPropietario.filter(p => p.nombre !== 'Laura').reduce((sum, p) => sum + p.montoNeto, 0);
-
   return (
     <div className="min-h-screen bg-gray-100 flex">
       {/* Contenido principal con tablas y resumen */}
@@ -138,7 +132,7 @@ const VentaPropiedadCalculadora = () => {
         
         {/* Tabla 1: Resumen General de Gastos */}
         <div className="mb-8">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-700">Tabla 1: Resumen General de los Gastos</h2>
+          <h2 className="text-2xl font-semibold mb-4 text-gray-700">Tabla 1: Resumen General de los Gastos en los que Incurrimos</h2>
           <div className="overflow-x-auto">
             <table className="min-w-full border border-gray-300">
               <thead className="bg-blue-100">
